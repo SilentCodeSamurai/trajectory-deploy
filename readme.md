@@ -9,36 +9,40 @@ Instructions:
 # Clone the repository
 
 ```bash
-git clone https://github.com/username/repository.git
+git clone https://github.com/SilentCodeSamurai/trajectory-deploy.git
 ```
 
 # Install docker and docker-compose
 
 Installation depends on your OS. Documentation: https://docs.docker.com/install/
 
-# Create docker network
+### Setup frontend
 
-```bash
-docker network create -d bridge intranet
-```
+Place compiled react app in ./frontend/build
 
-# Build frontend docker image
+### Build frontend docker image
 
 ```bash
 cd frontend
 docker build -t trajectory-frontend .
 ```
 
-# Setup plugins for wordpress
+### Setup plugins for wordpress
 
 Place plugins in ./wordpress/plugins
 
-# Run containers
+### Create docker network
+
+```bash
+docker network create -d bridge intranet
+```
+
+### Run containers
 
 ```bash
 docker-compose up
 ```
 
-# Open browser
+### Open browser
 
 http://wp.localhost
