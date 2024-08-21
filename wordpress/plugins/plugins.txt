@@ -1,0 +1,11 @@
+https://wordpress.org/plugins/loginizer/
+https://www.sterling-adventures.co.uk/2008/03/01/avatars-plugin/
+https://ru.wordpress.org/plugins/media-category-library/
+https://ru.wordpress.org/plugins/multisite-clone-duplicator/
+https://ru.wordpress.org/plugins/safe-svg/
+https://ru.wordpress.org/plugins/wp-mail-smtp/
+https://ru.wordpress.org/plugins/sp-rtl-rus-to-lat/
+https://ru.wordpress.org/plugins/wp-super-cache/
+
+https://gitlab.com/wp37/pe-fest
+https://gitlab.com/wp37/pe-core
