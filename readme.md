@@ -12,7 +12,11 @@ Instructions:
 git clone https://github.com/SilentCodeSamurai/trajectory-deploy.git
 ```
 
-## Install docker and docker-compose
+## Setup plugins for wordpress
+
+Place plugins in ./wordpress/plugins
+
+## Install docker
 
 Installation depends on your OS. Documentation: https://docs.docker.com/install/
 
@@ -25,22 +29,25 @@ Place compiled react app in ./frontend/build
 ```bash
 cd frontend
 docker build -t trajectory-frontend .
+cd ..
 ```
 
-## Setup plugins for wordpress
+## Init docker swarm
 
-Place plugins in ./wordpress/plugins
+```bash
+docker swarm init --advertise-addr <server_ip>
+```
 
 ## Create docker network
 
 ```bash
-docker network create -d bridge intranet
+docker network create --driver overlay --scope swarm intranet
 ```
 
-## Run containers
+## Deploy the stack
 
 ```bash
-docker-compose up
+docker stack deploy -c swarm.yml trajectory
 ```
 
 ## Open browser
