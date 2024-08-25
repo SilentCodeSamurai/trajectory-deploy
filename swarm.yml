@@ -11,8 +11,8 @@ services:
             WORDPRESS_DB_PASSWORD: examplepass
             WORDPRESS_DB_NAME: exampledb
             WORDPRESS_CONFIG_EXTRA: |
-                define('WP_HOME', 'http://wp.kam-life-pro.ru/');
-                define('WP_SITEURL', 'http://wp.kam-life-pro.ru/');
+                define('WP_HOME', 'http://api.kam-life-pro.ru/');
+                define('WP_SITEURL', 'http://api.kam-life-pro.ru/');
                 define('WP_DEBUG_LOG', true );
                 define('WP_ALLOW_MULTISITE', true);
 
