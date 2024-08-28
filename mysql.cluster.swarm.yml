@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+    management:
+        image: mysql/mysql-cluster:latest
+        command: ndb_mgmd
+        networks:
+            - cluster
+        volumes:
+            - /path/to/mysql-cluster.cnf:/etc/mysql-cluster.cnf
+        deploy:
+            replicas: 1
+
+    ndb1:
+        image: mysql/mysql-cluster:latest
+        command: ndbd
+        networks:
+            - cluster
+        deploy:
+            replicas: 2
+
+    mysql:
+        image: mysql/mysql-cluster:latest
+        command: mysqld
+        environment:
+            MYSQL_ROOT_PASSWORD: "YourRootPassword" # Set your root password here
+        networks:
+            - cluster
+        deploy:
+            replicas: 1
+
+networks: 
+    cluster:
+        driver: overlay
+
+# docker stack deploy -c mysql.cluster.swarm.yml mysql_cluster

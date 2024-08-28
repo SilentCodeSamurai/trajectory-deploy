@@ -1,0 +1,8 @@
+server {
+    listen 8123;
+    server_name ${FRONTEND_SERVER_NAME};
+
+    location / {
+        proxy_pass http://frontend:3000;
+    }
+}

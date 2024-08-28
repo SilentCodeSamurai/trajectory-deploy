@@ -1,18 +1,55 @@
-version: "3.1"
-
 services:
+    nginx:
+        image: nginx:latest
+        environment:
+            - BACKEND_SERVER_NAME=${BACKEND_SERVER_NAME}
+            - FRONTEND_SERVER_NAME=${FRONTEND_SERVER_NAME}
+        ports:
+            - "80:80"
+            - "443:443"
+            - "8080:8080"
+        volumes:
+            - wordpress:/var/www/html
+            - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+            - ./nginx:/etc/nginx/templates
+            # - /etc/letsencrypt/live/<domain>/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
+            # - /etc/letsencrypt/live/<domain>/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
+        networks:
+            - intranet
+        deploy:
+            replicas: 1
+            placement:
+                constraints: [node.role == manager]
+            restart_policy:
+                condition: on-failure
+
+    db:
+        image: mysql:8.0
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        ports:
+            - "3306:3306"
+        volumes:
+            - db:/var/lib/mysql
+            - ./mysql/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+        networks:
+            - intranet
+
     wordpress:
         image: wordpress:php8.1-fpm
         ports:
             - "9000:9000"
         environment:
             WORDPRESS_DB_HOST: db
-            WORDPRESS_DB_USER: exampleuser
-            WORDPRESS_DB_PASSWORD: examplepass
-            WORDPRESS_DB_NAME: exampledb
+            WORDPRESS_DB_USER: ${MYSQL_USER}
+            WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+            WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
             WORDPRESS_CONFIG_EXTRA: |
-                define('WP_HOME', 'http://api.kam-life-pro.ru/');
-                define('WP_SITEURL', 'http://api.kam-life-pro.ru/');
+                define('WP_HOME', 'http://${BACKEND_SERVER_NAME}');
+                define('WP_SITEURL', 'http://${BACKEND_SERVER_NAME}');
                 define('WP_DEBUG_LOG', true );
                 define('WP_ALLOW_MULTISITE', true);
 
@@ -26,22 +63,12 @@ services:
         volumes:
             - wordpress:/var/www/html
             - ./wordpress/plugins:/var/www/html/wp-content/plugins
+            - ./wordpress/php-fpm/www.conf:/usr/local/etc/php-fpm.d/www.conf
         networks:
             - intranet
         deploy:
-            replicas: 1
-
-    db:
-        image: mysql:8.0
-        environment:
-            MYSQL_DATABASE: exampledb
-            MYSQL_USER: exampleuser
-            MYSQL_PASSWORD: examplepass
-            MYSQL_RANDOM_ROOT_PASSWORD: "1"
-        volumes:
-            - db:/var/lib/mysql
-        networks:
-            - intranet
+            replicas: 3
+        hostname: "wordpress-{{.Task.Slot}}"
 
     frontend:
         image: trajectory-frontend
@@ -50,38 +77,89 @@ services:
         networks:
             - intranet
 
-    nginx:
-        image: nginx:latest
-        ports:
-            - "80:80"
-            - "443:443"
-        volumes:
-            - wordpress:/var/www/html
-            - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-            # - /etc/letsencrypt/live/<domain>/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
-            # - /etc/letsencrypt/live/<domain>/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
+    nginx-exporter:
+        image: nginx/nginx-prometheus-exporter:latest
+        command:
+            - -nginx.scrape-uri=http://nginx:8080/stub_status
         networks:
             - intranet
         deploy:
             replicas: 1
-            placement:
-                constraints: [node.role == manager]
+
+    mysql-exporter:
+        image: prom/mysqld-exporter
+        networks:
+            - intranet
+        ports:
+            - "9104:9104"
+        environment:
+            MYSQLD_EXPORTER_PASSWORD: ${MYSQL_EXPORTER_PASSWORD}
+        volumes:
+            - ./mysql/mysqld_exporter.cnf:/etc/mysqld_exporter.cnf
+        command:
+            - --config.my-cnf=/etc/mysqld_exporter.cnf
+            - --mysqld.address=db:3306
+        deploy:
+            replicas: 1
+            resources:
+                limits:
+                    cpus: "0.50"
+                    memory: 512M
+
+    wordpress-exporter:
+        image: hipages/php-fpm_exporter:latest
+        environment:
+            - PHP_FPM_SCRAPE_URI=tcp://wordpress-{{.Task.Slot}}:9000/status
+        networks:
+            - intranet
+        deploy:
+            replicas: 3
             restart_policy:
                 condition: on-failure
+
+    prometheus:
+        image: prom/prometheus:latest
+        volumes:
+            - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+            - prometheus-data:/prometheus
+        ports:
+            - "9090:9090" # Expose Prometheus UI
+        networks:
+            - intranet
+        deploy:
+            replicas: 1
+
+    grafana:
+        image: grafana/grafana:latest
+        ports:
+            - "3001:3000"
+        volumes:
+            - grafana_data:/var/lib/grafana
+        environment:
+            - GF_SECURITY_ADMIN_PASSWORD=admin
+        networks:
+            - intranet
+        deploy:
+            replicas: 1
 
 networks:
     intranet:
         external: true
 
 volumes:
-    wordpress:
     db:
-
+    wordpress:
+    prometheus-data:
+    grafana_data:
 # docker swarm init --advertise-addr
 # docker network create --driver overlay --scope swarm intranet
 
-# docker stack deploy -c swarm.yml trajectory
-# docker stack rm trajectory
 # docker stack ls
+
+# docker compose config >swarm.yml
+# docker stack deploy -c swarm.yml trajectory
 # docker stack services trajectory
 # docker stack ps trajectory
+
+# docker stack rm trajectory
+

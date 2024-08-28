@@ -1,0 +1,20 @@
+global:
+    scrape_interval: 15s
+
+scrape_configs:
+    - job_name: "nginx"
+      static_configs:
+          - targets: ["nginx-exporter:9113"]
+
+    - job_name: "wordpress"
+      dns_sd_configs:
+          - names:
+                - "tasks.wordpress-exporter"
+            type: "A"
+            port: 9253
+      metrics_path: "/metrics"
+
+    - job_name: mysql # To get metrics about the mysql exporter’s targets
+      static_configs:
+          - targets: ["mysql-exporter:9104"]
+

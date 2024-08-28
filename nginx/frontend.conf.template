@@ -1,0 +1,9 @@
+# Frontend server
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${FRONTEND_SERVER_NAME};
+    location / {
+        proxy_pass http://frontend:3000;
+    }
+}
