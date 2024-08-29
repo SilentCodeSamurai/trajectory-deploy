@@ -13,4 +13,4 @@ fi
 echo "Removing deployment of stack $STACK_NAME"
 
 # Remove the stack using Docker
-docker stack deploy rm $STACK_NAME
+docker stack rm $STACK_NAME
