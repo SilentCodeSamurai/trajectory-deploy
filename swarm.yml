@@ -120,7 +120,7 @@ services:
     cadvisor:
         image: google/cadvisor:latest
         deploy:
-        mode: global
+            mode: global
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock:ro
             - /:/rootfs:ro
