@@ -31,9 +31,7 @@ server {
     }
     
     location /graphql {
-        include fastcgi_params;
-        fastcgi_pass wordpress:9000;
-        fastcgi_param SCRIPT_FILENAME $document_root/wp-content/plugins/pe-core/class/graphql/pe-graphql.php;
+        try_files $uri /index.php$is_args$args;
     }
 
     location ~ \.php$ {
