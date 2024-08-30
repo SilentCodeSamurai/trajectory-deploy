@@ -117,6 +117,25 @@ services:
             restart_policy:
                 condition: on-failure
 
+    cadvisor:
+        image: google/cadvisor:latest
+        deploy:
+        mode: global
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+            - /:/rootfs:ro
+            - /var/run:/var/run
+            - /sys:/sys:ro
+            - /var/lib/docker:/var/lib/docker:ro
+        networks:
+            - intranet
+        ports:
+            - target: 8080
+              published: 8080
+              mode: host
+        labels:
+        prometheus-job: "cadvisor"
+
     prometheus:
         image: prom/prometheus:latest
         volumes:
