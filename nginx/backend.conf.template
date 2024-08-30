@@ -29,12 +29,12 @@ server {
     location / {
         try_files $uri $uri/ /index.php$is_args$args;
     }
-
+    
     location /graphql {
         fastcgi_pass wordpress:9000;
         fastcgi_index index.php;
         include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME /var/www/html/wp-content/plugins/pe-core/class/graphql/pe-graphql.php;
+        fastcgi_param SCRIPT_FILENAME /var/www/html/wp-content/plugins/pe-core-main/class/graphql/pe-graphql.php;
         fastcgi_param PATH_INFO $fastcgi_path_info;
     }
 
