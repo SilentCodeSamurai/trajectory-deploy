@@ -134,7 +134,7 @@ services:
               published: 8080
               mode: host
         labels:
-        prometheus-job: "cadvisor"
+            prometheus-job: "cadvisor"
 
     prometheus:
         image: prom/prometheus:latest
