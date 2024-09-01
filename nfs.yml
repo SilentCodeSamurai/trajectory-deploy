@@ -8,8 +8,8 @@ services:
         networks:
             - intranet
         volumes:
-            - /configs:/nfs-data/configs
-            - /wordpress/plugins:/nfs-data/wordpress/plugins
+            - ./configs:/nfs-data/configs
+            - ./wordpress/plugins:/nfs-data/wordpress/plugins
         environment:
             - NFS_EXPORT_0='/nfs-data *(rw,sync,no_subtree_check)'
 
