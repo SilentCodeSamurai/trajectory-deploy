@@ -10,18 +10,10 @@ services:
         volumes:
             - ./shared:/nfs-data
         environment:
-            - SHARED_DIRECTORY="/nfs-data *(rw,sync,no_subtree_check)"
+            - NFS_EXPORT_0=/nfs-data *(rw,sync,no_subtree_check)
 
 networks:
     intranet:
         external: true
-
-volumes:
-    nfs:
-        driver: local
-        driver_opts:
-            type: "nfs"
-            o: "addr=nfs-server,vers=4,proto=tcp"
-            device: ":/nfs-data"
 
 # docker stack deploy -c nfs.yml nfs --detach=true
