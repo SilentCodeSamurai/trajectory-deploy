@@ -8,12 +8,11 @@ services:
         networks:
             - intranet
         volumes:
-            - ./shared:/mnt/data:rw
+            - ./shared:/nfs-data:rw
         environment:
-            - NFS_EXPORT_0='/mnt/data *(rw,no_subtree_check)'
+            NFS_EXPORT_0: nfs-data *(rw,no_subtree_check)
 
 networks:
     intranet:
         external: true
-
 # docker stack deploy -c nfs.yml nfs --detach=true
