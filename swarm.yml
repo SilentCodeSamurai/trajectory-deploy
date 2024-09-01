@@ -244,6 +244,12 @@ volumes:
             o: "addr=${SERVER_IP},rw"
             device: ":/srv/nfs/shared/configs/mysql"
 
+    prometheus-configs:
+        driver_opts:
+            type: "nfs"
+            o: "addr=${SERVER_IP},rw"
+            device: ":/srv/nfs/shared/configs/prometheus"
+
     mysql-exporter-configs:
         driver_opts:
             type: "nfs"
