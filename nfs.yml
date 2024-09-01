@@ -25,4 +25,4 @@ volumes:
             o: "addr=nfs-server,vers=4,proto=tcp"
             device: ":/nfs-data"
 
-# docker stack deploy -c swarm.yml nfs --detach=true
+# docker stack deploy -c nfs.yml nfs --detach=true
