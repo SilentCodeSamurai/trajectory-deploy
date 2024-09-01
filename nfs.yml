@@ -13,7 +13,8 @@ services:
             - "8080:8080"
         volumes:
             # - wordpress-html:/var/www/html
-            - nginx-configs:/etc/nginx:ro
+            - nginx-config:/etc/nginx/nginx.conf:ro
+            - nginx-templates:/etc/nginx/templates
             # - /etc/letsencrypt/live/<domain>/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
             # - /etc/letsencrypt/live/<domain>/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
         networks:
@@ -27,11 +28,17 @@ services:
 
 volumes:
 
-    nginx-configs:
+    nginx-config:
         driver_opts:
             type: "nfs"
             o: "addr=${SERVER_IP},rw"
-            device: ":/srv/nfs/shared/configs/nginx"
+            device: ":/srv/nfs/shared/configs/nginx/nginx.conf"
+
+    nginx-templates:
+        driver_opts:
+            type: "nfs"
+            o: "addr=${SERVER_IP},rw"
+            device: ":/srv/nfs/shared/configs/nginx/templates"
 
     # wordpress-html:
     #     driver_opts:
