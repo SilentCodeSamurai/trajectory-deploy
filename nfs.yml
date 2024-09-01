@@ -43,7 +43,7 @@ services:
                 condition: on-failure
 
 volumes:
-    shared-data:
+    nfs:
         driver_opts:
             type: "nfs"
             o: "addr=${SERVER_IP},rw"
