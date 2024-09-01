@@ -46,7 +46,7 @@ services:
                 "&&",
                 "[ -d /etc/nginx/templates ] && echo 'OK' || echo 'FAIL'",
             ]
-            
+
     nginx:
         image: nginx:latest
         environment:
@@ -60,18 +60,18 @@ services:
             - type: volume
               source: nfs
               volume:
-                  subpath: /wordpress/html
+                  subpath: wordpress/html
               target: /var/www/html
             - type: volume
               source: nfs
               volume:
-                  subpath: /configs/nginx/nginx.conf
+                  subpath: configs/nginx/nginx.conf
               target: /etc/nginx/nginx.conf
               read_only: true
             - type: volume
               source: nfs
               volume:
-                  subpath: /configs/nginx
+                  subpath: configs/nginx
               target: /etc/nginx/templates
               read_only: true
             # - /etc/letsencrypt/live/<domain>/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
