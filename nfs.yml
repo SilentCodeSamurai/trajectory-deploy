@@ -21,6 +21,7 @@ services:
                 "-c",
                 "ln -sf /mnt/nginx/nginx.conf /etc/nginx/nginx.conf && ln -sf /mnt/nginx/templates /etc/nginx/templates && exec /docker-entrypoint.sh",
             ]
+        command: ["nginx", "-g", "daemon off;"]
         networks:
             - intranet
         deploy:
