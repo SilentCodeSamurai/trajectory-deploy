@@ -36,7 +36,17 @@ services:
                   subpath: /configs/nginx
               target: /etc/nginx/templates
               read_only: true
-
+        command:
+            [
+                "/bin/sh",
+                "-c",
+                "[ -d /var/www/html ] && echo 'OK' || echo 'FAIL'",
+                "&&",
+                "[ -f /etc/nginx/nginx.conf ] && echo 'OK' || echo 'FAIL'",
+                "&&",
+                "[ -d /etc/nginx/templates ] && echo 'OK' || echo 'FAIL'",
+            ]
+            
     nginx:
         image: nginx:latest
         environment:
