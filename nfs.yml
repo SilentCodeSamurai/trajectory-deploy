@@ -15,8 +15,6 @@ services:
             restart_policy:
                 condition: none
 
-        depends_on:
-            - nfs-server
 
     nginx:
         image: nginx:latest
