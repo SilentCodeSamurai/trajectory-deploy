@@ -1,52 +1,7 @@
 version: "3.7"
 
 services:
-    initializer:
-        image: busybox
-        volumes:
-            - nfs:/shared
-            - ./shared:/nfs-copy
-        command: ["/bin/sh", "-c", "cp -r /nfs-copy/* /shared/"]
-        deploy:
-            replicas: 1
-            placement:
-                constraints: [node.role == manager]
-            restart_policy:
-                condition: none
-        networks:
-            intranet:
-
-    busybox-checker:
-        image: busybox
-        volumes:
-            - type: volume
-              source: nfs
-              volume:
-                  subpath: /wordpress/html
-              target: /var/www/html
-            - type: volume
-              source: nfs
-              volume:
-                  subpath: /configs/nginx/nginx.conf
-              target: /etc/nginx/nginx.conf
-              read_only: true
-            - type: volume
-              source: nfs
-              volume:
-                  subpath: /configs/nginx
-              target: /etc/nginx/templates
-              read_only: true
-        command:
-            [
-                "/bin/sh",
-                "-c",
-                "[ -d /var/www/html ] && echo 'OK' || echo 'FAIL'",
-                "&&",
-                "[ -f /etc/nginx/nginx.conf ] && echo 'OK' || echo 'FAIL'",
-                "&&",
-                "[ -d /etc/nginx/templates ] && echo 'OK' || echo 'FAIL'",
-            ]
-
+    
     nginx:
         image: nginx:latest
         environment:
@@ -57,23 +12,8 @@ services:
             - "443:443"
             - "8080:8080"
         volumes:
-            - type: volume
-              source: nfs
-              volume:
-                  subpath: wordpress/html
-              target: /var/www/html
-            - type: volume
-              source: nfs
-              volume:
-                  subpath: configs/nginx/nginx.conf
-              target: /etc/nginx/nginx.conf
-              read_only: true
-            - type: volume
-              source: nfs
-              volume:
-                  subpath: configs/nginx
-              target: /etc/nginx/templates
-              read_only: true
+            - wordpress-html:/var/www/html
+            - nginx-configs:/etc/nginx:ro
             # - /etc/letsencrypt/live/<domain>/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
             # - /etc/letsencrypt/live/<domain>/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
         networks:
@@ -86,11 +26,18 @@ services:
                 condition: on-failure
 
 volumes:
-    nfs:
+
+    nginx-configs:
         driver_opts:
             type: "nfs"
             o: "addr=${SERVER_IP},rw"
-            device: ":/srv/nfs/shared"
+            device: ":/srv/nfs/shared/configs/nginx"
+
+    wordpress-html:
+        driver_opts:
+            type: "nfs"
+            o: "addr=${SERVER_IP},rw"
+            device: ":/srv/nfs/shared/wordpress/html"
 
 networks:
     intranet:

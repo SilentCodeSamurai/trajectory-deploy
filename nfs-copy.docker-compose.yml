@@ -1,0 +1,15 @@
+services:
+
+    copier:
+        image: busybox
+        volumes:
+            - nfs:/shared
+            - ./shared:/nfs-copy
+        command: [ "/bin/sh", "-c", "cp -r /nfs-copy/* /shared/ && echo 'Copied content:' && ls -l /shared" ]
+
+volumes:
+    nfs:
+        driver_opts:
+            type: "nfs"
+            o: "addr=${SERVER_IP},rw"
+            device: ":/srv/nfs/shared"
