@@ -1,7 +1,6 @@
 version: "3.7"
 
 services:
-    
     nginx:
         image: nginx:latest
         environment:
@@ -13,10 +12,15 @@ services:
             - "8080:8080"
         volumes:
             # - wordpress-html:/var/www/html
-            - nginx-config:/etc/nginx/nginx.conf:ro
-            - nginx-templates:/etc/nginx/templates
+            - nginx-configs:/mnt/nginx
             # - /etc/letsencrypt/live/<domain>/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
             # - /etc/letsencrypt/live/<domain>/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
+        entrypoint:
+            [
+                "/bin/sh",
+                "-c",
+                "ln -sf /mnt/nginx/nginx.conf /etc/nginx/nginx.conf && ln -sf /mnt/nginx/templates /etc/nginx/templates && exec nginx -g 'daemon off;'",
+            ]
         networks:
             - intranet
         deploy:
@@ -27,18 +31,11 @@ services:
                 condition: on-failure
 
 volumes:
-
-    nginx-config:
+    nginx-configs:
         driver_opts:
             type: "nfs"
             o: "addr=${SERVER_IP},rw"
-            device: ":/srv/nfs/shared/configs/nginx/nginx.conf"
-
-    nginx-templates:
-        driver_opts:
-            type: "nfs"
-            o: "addr=${SERVER_IP},rw"
-            device: ":/srv/nfs/shared/configs/nginx/templates"
+            device: ":/srv/nfs/shared/configs/nginx"
 
     # wordpress-html:
     #     driver_opts:
