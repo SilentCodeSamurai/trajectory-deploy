@@ -92,7 +92,6 @@ services:
         hostname: "wordpress-{{.Task.Slot}}"
         deploy:
             replicas: 3
-        
 
     frontend:
         image: trajectory-frontend
@@ -121,15 +120,22 @@ services:
             restart_policy:
                 condition: on-failure
 
-
     # Metrics source
     prometheus:
         image: prom/prometheus:latest
-        volumes:
-            - nfs/configs/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-            - prometheus-data:/prometheus
         ports:
             - "9090:9090" # Expose Prometheus UI
+        volumes:
+            - prometheus-configs:/mnt/prometheus
+            - prometheus-data:/prometheus
+        entrypoint:
+            [
+                "/bin/prometheus",
+                "--config.file=/mnt/prometheus/prometheus.yml",
+                "--storage.tsdb.path=/prometheus",
+                "--web.console.libraries=/usr/share/prometheus/console_libraries",
+                "--web.console.templates=/usr/share/prometheus/consoles",
+            ]
         networks:
             - intranet
         deploy:
@@ -243,11 +249,14 @@ volumes:
             type: "nfs"
             o: "addr=${SERVER_IP},rw"
             device: ":/srv/nfs/shared/configs/exporters/mysql"
-
 # docker swarm init --advertise-addr
 # docker network create --driver overlay --scope swarm intranet
 
+# chmod +x docker-pull.sh
+# ./docker-pull.sh
+
 # chmod +x deploy.sh
+
 # ./deploy.sh copy
 
 # docker stack services trajectory
