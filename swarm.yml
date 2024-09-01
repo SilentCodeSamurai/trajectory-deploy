@@ -44,7 +44,7 @@ services:
             [
                 "/bin/sh",
                 "-c",
-                "ln -sf /mnt/mysql/init-db.sql /docker-entrypoint-initdb.d/init-db.sql && exec /docker-entrypoint.sh mysqld",
+                "ln -sf /mnt/mysql/init-db.sql /docker-entrypoint-initdb.d/init-db.sql && exec docker-entrypoint.sh mysqld",
             ]
         networks:
             - intranet
