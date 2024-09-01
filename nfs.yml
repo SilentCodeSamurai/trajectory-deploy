@@ -10,9 +10,8 @@ services:
         volumes:
             - ./configs:/nfs-data/configs
             - ./wordpress/plugins:/nfs-data/wordpress/plugins
-        environment:
-            - NFS_EXPORT_0='/nfs-data *(rw,sync,no_subtree_check)'
-        command: sh -c "mkdir -p /nfs-data && /start.sh"
+        # environment:
+        #     - NFS_EXPORT_0='/nfs-data *(rw,sync,no_subtree_check)'
 
 networks:
     intranet:
