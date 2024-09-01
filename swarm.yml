@@ -1,4 +1,5 @@
 services:
+
     nginx:
         image: nginx:latest
         environment:
@@ -9,9 +10,9 @@ services:
             - "443:443"
             - "8080:8080"
         volumes:
-            - wordpress:/var/www/html
-            - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-            - ./nginx:/etc/nginx/templates
+            - nfs/wordpress/html:/var/www/html
+            - nfs/configs/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+            - nfs/configs/nginx:/etc/nginx/templates
             # - /etc/letsencrypt/live/<domain>/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
             # - /etc/letsencrypt/live/<domain>/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
         networks:
@@ -34,7 +35,7 @@ services:
             - "3306:3306"
         volumes:
             - db:/var/lib/mysql
-            - ./mysql/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+            - nfs/configs/mysql/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
         networks:
             - intranet
 
@@ -53,17 +54,17 @@ services:
                 define('WP_DEBUG_LOG', true );
                 define('WP_ALLOW_MULTISITE', true);
 
-                define( 'MULTISITE', true );
-                define( 'SUBDOMAIN_INSTALL', true );
-                define( 'DOMAIN_CURRENT_SITE', '${BACKEND_SERVER_NAME}' );
-                define( 'PATH_CURRENT_SITE', '/' );
-                define( 'SITE_ID_CURRENT_SITE', 1 );
-                define( 'BLOG_ID_CURRENT_SITE', 1 );
+            # define( 'MULTISITE', true );
+            # define( 'SUBDOMAIN_INSTALL', true );
+            # define( 'DOMAIN_CURRENT_SITE', '${BACKEND_SERVER_NAME}' );
+            # define( 'PATH_CURRENT_SITE', '/' );
+            # define( 'SITE_ID_CURRENT_SITE', 1 );
+            # define( 'BLOG_ID_CURRENT_SITE', 1 );
 
         volumes:
-            - wordpress:/var/www/html
-            - ./wordpress/plugins:/var/www/html/wp-content/plugins
-            - ./wordpress/php-fpm/www.conf:/usr/local/etc/php-fpm.d/www.conf
+            - nfs/wordpress/html:/var/www/html
+            - nfs/wordpress/plugins:/var/www/html/wp-content/plugins
+            - nfs/configs/php-fpm/www.conf:/usr/local/etc/php-fpm.d/www.conf
         networks:
             - intranet
         deploy:
@@ -95,7 +96,7 @@ services:
         environment:
             MYSQLD_EXPORTER_PASSWORD: ${MYSQL_EXPORTER_PASSWORD}
         volumes:
-            - ./mysql/mysqld_exporter.cnf:/etc/mysqld_exporter.cnf
+            - nfs/configs/mysql/mysqld_exporter.cnf:/etc/mysqld_exporter.cnf
         command:
             - --config.my-cnf=/etc/mysqld_exporter.cnf
             - --mysqld.address=db:3306
@@ -135,7 +136,7 @@ services:
     prometheus:
         image: prom/prometheus:latest
         volumes:
-            - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+            - nfs/configs/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
             - prometheus-data:/prometheus
         ports:
             - "9090:9090" # Expose Prometheus UI
@@ -163,9 +164,16 @@ networks:
 
 volumes:
     db:
-    wordpress:
     prometheus-data:
     grafana_data:
+
+    nfs:
+        driver: local
+        driver_opts:
+            type: "nfs"
+            o: "addr=nfs-server,vers=4,proto=tcp"
+            device: ":/nfs-data"
+
 # docker swarm init --advertise-addr
 # docker network create --driver overlay --scope swarm intranet
 
@@ -177,4 +185,3 @@ volumes:
 # docker stack ps trajectory
 
 # docker stack rm trajectory
-

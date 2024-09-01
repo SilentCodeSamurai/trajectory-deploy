@@ -1,0 +1,28 @@
+version: "3.7"
+
+services:
+    nfs-server:
+        image: erichough/nfs-server
+        cap_add:
+            - SYS_ADMIN
+        networks:
+            - intranet
+        volumes:
+            - ./configs:/nfs-data/configs
+            - ./wordpress/plugins:/nfs-data/wordpress/plugins
+        environment:
+            - NFS_EXPORT_0='/nfs-data *(rw,sync,no_subtree_check)'
+
+networks:
+    intranet:
+        external: true
+
+volumes:
+    nfs:
+        driver: local
+        driver_opts:
+            type: "nfs"
+            o: "addr=nfs-server,vers=4,proto=tcp"
+            device: ":/nfs-data"
+
+# docker stack deploy -c swarm.yml nfs --detach=true
