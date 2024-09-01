@@ -13,4 +13,4 @@ fi
 echo "Starting deployment of stack $STACK_NAME"
 
 # Deploy the stack using Docker
-docker stack deploy -c nfs.yml "$STACK_NAME" --detach=true
+docker stack deploy -c nfs.yml "$STACK_NAME" --detach=false

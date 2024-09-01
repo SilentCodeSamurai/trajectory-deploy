@@ -13,6 +13,8 @@ services:
                 constraints: [node.role == manager]
             restart_policy:
                 condition: none
+        networks:
+            intranet:
 
     nginx:
         image: nginx:latest
