@@ -8,9 +8,9 @@ services:
         networks:
             - intranet
         volumes:
-            - ./shared:/nfs-data
+            - ./shared:/mnt/data:rw
         environment:
-            - NFS_EXPORT_0='/nfs-data *(rw,sync,no_subtree_check)'
+            - NFS_EXPORT_0='/mnt/data *(rw,no_subtree_check)'
 
 networks:
     intranet:
