@@ -4,7 +4,7 @@ services:
     initializer:
         image: busybox
         volumes:
-            - shared-data:/shared
+            - nfs:/shared
             - ./configs:/configs
             - ./wordpress/plugins:/wordpress/plugins
         command: ["/bin/sh", "-c", "cp -r /configs/* /shared/", "cp -r /wordpress/* /shared/wordpress/"]
