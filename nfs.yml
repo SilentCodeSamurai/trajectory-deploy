@@ -10,7 +10,7 @@ services:
         volumes:
             - ./shared:/nfs-data
         environment:
-            - NFS_EXPORT_0=/nfs-data *(rw,sync,no_subtree_check)
+            - NFS_EXPORT_0='/nfs-data *(rw,sync,no_subtree_check)'
 
 networks:
     intranet:
