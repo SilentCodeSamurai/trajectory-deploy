@@ -16,6 +16,27 @@ services:
         networks:
             intranet:
 
+    busybox-checker:
+        image: busybox
+        volumes:
+            - type: volume
+              source: nfs
+              volume:
+                  subpath: /wordpress/html
+              target: /var/www/html
+            - type: volume
+              source: nfs
+              volume:
+                  subpath: /configs/nginx/nginx.conf
+              target: /etc/nginx/nginx.conf
+              read_only: true
+            - type: volume
+              source: nfs
+              volume:
+                  subpath: /configs/nginx
+              target: /etc/nginx/templates
+              read_only: true
+
     nginx:
         image: nginx:latest
         environment:
