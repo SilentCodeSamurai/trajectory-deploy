@@ -5,7 +5,7 @@ services:
         volumes:
             - nfs:/shared
             - ./shared:/nfs-copy
-        command: [ "/bin/sh", "-c", "cp -r /nfs-copy/* /shared/ && echo 'Copied content:' && ls -l /shared" ]
+        command: [ "/bin/sh", "-c", "rm -rf /shared/* && cp -r /nfs-copy/* /shared/ && echo 'Copied content:' && ls -l /shared" ]
 
 volumes:
     nfs:

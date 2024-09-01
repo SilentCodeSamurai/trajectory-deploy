@@ -1,5 +1,4 @@
 services:
-
     nginx:
         image: nginx:latest
         environment:
@@ -10,11 +9,16 @@ services:
             - "443:443"
             - "8080:8080"
         volumes:
-            - nfs/wordpress/html:/var/www/html
-            - nfs/configs/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-            - nfs/configs/nginx:/etc/nginx/templates
+            - wordpress-html:/var/www/html
+            - nginx-configs:/mnt/nginx
             # - /etc/letsencrypt/live/<domain>/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
             # - /etc/letsencrypt/live/<domain>/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
+        entrypoint:
+            [
+                "/bin/sh",
+                "-c",
+                "ln -sf /mnt/nginx/nginx.conf /etc/nginx/nginx.conf && ln -sf /mnt/nginx/templates /etc/nginx/templates && exec /docker-entrypoint.sh nginx -g 'daemon off;'",
+            ]
         networks:
             - intranet
         deploy:
@@ -34,10 +38,22 @@ services:
         ports:
             - "3306:3306"
         volumes:
+            - mysql-configs:/mnt/mysql
             - db:/var/lib/mysql
-            - nfs/configs/mysql/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+        entrypoint:
+            [
+                "/bin/sh",
+                "-c",
+                "ln -sf /mnt/mysql/init-db.sql /docker-entrypoint-initdb.d/init-db.sql && exec /docker-entrypoint.sh mysqld",
+            ]
         networks:
             - intranet
+        deploy:
+            replicas: 1
+            placement:
+                constraints: [node.role == manager]
+            restart_policy:
+                condition: on-failure
 
     wordpress:
         image: wordpress:php8.1-fpm
@@ -62,14 +78,21 @@ services:
             # define( 'BLOG_ID_CURRENT_SITE', 1 );
 
         volumes:
-            - nfs/wordpress/html:/var/www/html
-            - nfs/wordpress/plugins:/var/www/html/wp-content/plugins
-            - nfs/configs/php-fpm/www.conf:/usr/local/etc/php-fpm.d/www.conf
+            - wordpress-html:/var/www/html
+            - wordpress-plugins:/var/www/html/wp-content/plugins
+            - php-fpm-configs:/mnt/php-fpm
+        entrypoint:
+            [
+                "/bin/sh",
+                "-c",
+                "ln -sf /mnt/php-fpm/www.conf /usr/local/etc/php-fpm.d/www.conf && exec /docker-entrypoint.sh php-fpm",
+            ]
         networks:
             - intranet
+        hostname: "wordpress-{{.Task.Slot}}"
         deploy:
             replicas: 3
-        hostname: "wordpress-{{.Task.Slot}}"
+        
 
     frontend:
         image: trajectory-frontend
@@ -78,6 +101,45 @@ services:
         networks:
             - intranet
 
+    # Metrics
+
+    # Grafana
+    grafana:
+        image: grafana/grafana:latest
+        ports:
+            - "3001:3000"
+        volumes:
+            - grafana_data:/var/lib/grafana
+        environment:
+            - GF_SECURITY_ADMIN_PASSWORD=admin
+        networks:
+            - intranet
+        deploy:
+            replicas: 1
+            placement:
+                constraints: [node.role == manager]
+            restart_policy:
+                condition: on-failure
+
+
+    # Metrics source
+    prometheus:
+        image: prom/prometheus:latest
+        volumes:
+            - nfs/configs/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+            - prometheus-data:/prometheus
+        ports:
+            - "9090:9090" # Expose Prometheus UI
+        networks:
+            - intranet
+        deploy:
+            replicas: 1
+            placement:
+                constraints: [node.role == manager]
+            restart_policy:
+                condition: on-failure
+
+    # Exporters
     nginx-exporter:
         image: nginx/nginx-prometheus-exporter:latest
         command:
@@ -86,6 +148,10 @@ services:
             - intranet
         deploy:
             replicas: 1
+            placement:
+                constraints: [node.role == manager]
+            restart_policy:
+                condition: on-failure
 
     mysql-exporter:
         image: prom/mysqld-exporter
@@ -96,9 +162,9 @@ services:
         environment:
             MYSQLD_EXPORTER_PASSWORD: ${MYSQL_EXPORTER_PASSWORD}
         volumes:
-            - nfs/configs/mysql/mysqld_exporter.cnf:/etc/mysqld_exporter.cnf
+            - mysql-exporter-configs:/mnt/mysql-exporter
         command:
-            - --config.my-cnf=/etc/mysqld_exporter.cnf
+            - --config.my-cnf=/mnt/mysql-exporter/mysqld_exporter.cnf
             - --mysqld.address=db:3306
         deploy:
             replicas: 1
@@ -133,31 +199,6 @@ services:
         labels:
             prometheus-job: "cadvisor"
 
-    prometheus:
-        image: prom/prometheus:latest
-        volumes:
-            - nfs/configs/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-            - prometheus-data:/prometheus
-        ports:
-            - "9090:9090" # Expose Prometheus UI
-        networks:
-            - intranet
-        deploy:
-            replicas: 1
-
-    grafana:
-        image: grafana/grafana:latest
-        ports:
-            - "3001:3000"
-        volumes:
-            - grafana_data:/var/lib/grafana
-        environment:
-            - GF_SECURITY_ADMIN_PASSWORD=admin
-        networks:
-            - intranet
-        deploy:
-            replicas: 1
-
 networks:
     intranet:
         external: true
@@ -167,21 +208,50 @@ volumes:
     prometheus-data:
     grafana_data:
 
-    nfs:
-        driver: local
+    wordpress-html:
         driver_opts:
             type: "nfs"
-            o: "addr=nfs-server,vers=4,proto=tcp"
-            device: ":/nfs-data"
+            o: "addr=${SERVER_IP},rw"
+            device: ":/srv/nfs/shared/wordpress/html"
+
+    wordpress-plugins:
+        driver_opts:
+            type: "nfs"
+            o: "addr=${SERVER_IP},rw"
+            device: ":/srv/nfs/shared/wordpress/plugins"
+
+    nginx-configs:
+        driver_opts:
+            type: "nfs"
+            o: "addr=${SERVER_IP},rw"
+            device: ":/srv/nfs/shared/configs/nginx"
+
+    php-fpm-configs:
+        driver_opts:
+            type: "nfs"
+            o: "addr=${SERVER_IP},rw"
+            device: ":/srv/nfs/shared/configs/php-fpm"
+
+    mysql-configs:
+        driver_opts:
+            type: "nfs"
+            o: "addr=${SERVER_IP},rw"
+            device: ":/srv/nfs/shared/configs/mysql"
+
+    mysql-exporter-configs:
+        driver_opts:
+            type: "nfs"
+            o: "addr=${SERVER_IP},rw"
+            device: ":/srv/nfs/shared/configs/exporters/mysql"
 
 # docker swarm init --advertise-addr
 # docker network create --driver overlay --scope swarm intranet
 
-# docker stack ls
+# chmod +x deploy.sh
+# ./deploy.sh copy
 
-# docker compose config >swarm.yml
-# docker stack deploy -c swarm.yml trajectory
 # docker stack services trajectory
+# docker service logs trajectory_
 # docker stack ps trajectory
 
 # docker stack rm trajectory
