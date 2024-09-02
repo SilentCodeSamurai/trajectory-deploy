@@ -4,6 +4,7 @@ Deployment of wordpress fpm nginx and react app with docker.
 
 ## Grafana dashboard ids:
 
-15796
+19908 - cAdvisor
+15796 - php-fpm
 14057
 12708
