@@ -16,6 +16,13 @@ server {
     server_tokens off;
     client_max_body_size 75M;
 
+
+    # Override settings for this server block
+    client_body_timeout 120s;
+    client_header_timeout 120s;
+    keepalive_timeout 120s;
+    send_timeout 120s;
+
     # update ssl files as required by your deployment
     # ssl_certificate     /etc/ssl/fullchain.pem;
     # ssl_certificate_key /etc/ssl/privkey.pem;
