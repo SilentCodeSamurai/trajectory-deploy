@@ -154,7 +154,7 @@ services:
         environment:
             MYSQLD_EXPORTER_PASSWORD: ${MYSQL_EXPORTER_PASSWORD}
         configs:
-            - source: mysql-exporter-configs
+            - source: mysqld-exporter-cnf
               target: /configs/mysql-exporter/mysqld_exporter.cnf
         networks:
             - intranet
