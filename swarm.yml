@@ -4,23 +4,28 @@ services:
         environment:
             - BACKEND_SERVER_NAME=${BACKEND_SERVER_NAME}
             - FRONTEND_SERVER_NAME=${FRONTEND_SERVER_NAME}
+        configs:
+            - source: nginx-conf
+              target: /etc/nginx/nginx.conf
+            - source: nginx-backend-template
+              target: /etc/nginx/templates/backend.conf.template
+            - source: nginx-default-template
+              target: /etc/nginx/templates/default.conf.template
+            - source: nginx-frontend-template
+              target: /etc/nginx/templates/frontend.conf.template
+            - source: nginx-stub-template
+              target: /etc/nginx/templates/stub.conf.template
+        volumes:
+            - wordpress-html:/var/www/html
+            # - /etc/letsencrypt/live/<domain>/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
+            # - /etc/letsencrypt/live/<domain>/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
+        networks:
+            - intranet
         ports:
             - "80:80"
             - "443:443"
             - "8080:8080"
-        volumes:
-            - wordpress-html:/var/www/html
-            - nginx-configs:/mnt/nginx
-            # - /etc/letsencrypt/live/<domain>/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
-            # - /etc/letsencrypt/live/<domain>/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
-        entrypoint:
-            [
-                "/bin/sh",
-                "-c",
-                "ln -sf /mnt/nginx/nginx.conf /etc/nginx/nginx.conf && ln -sf /mnt/nginx/templates /etc/nginx/templates && exec /docker-entrypoint.sh nginx -g 'daemon off;'",
-            ]
-        networks:
-            - intranet
+
         deploy:
             replicas: 1
             placement:
@@ -35,19 +40,15 @@ services:
             MYSQL_DATABASE: ${MYSQL_DATABASE}
             MYSQL_USER: ${MYSQL_USER}
             MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-        ports:
-            - "3306:3306"
+        configs:
+            - source: mysql-init-db
+              target: /docker-entrypoint-initdb.d/init-db.sql
         volumes:
-            - mysql-configs:/mnt/mysql
             - db:/var/lib/mysql
-        entrypoint:
-            [
-                "/bin/sh",
-                "-c",
-                "ln -sf /mnt/mysql/init-db.sql /docker-entrypoint-initdb.d/init-db.sql && exec docker-entrypoint.sh mysqld",
-            ]
         networks:
             - intranet
+        ports:
+            - "3306:3306"
         deploy:
             replicas: 1
             placement:
@@ -57,8 +58,6 @@ services:
 
     wordpress:
         image: wordpress:php8.1-fpm
-        ports:
-            - "9000:9000"
         environment:
             WORDPRESS_DB_HOST: db
             WORDPRESS_DB_USER: ${MYSQL_USER}
@@ -76,43 +75,40 @@ services:
                 define( 'PATH_CURRENT_SITE', '/' );
                 define( 'SITE_ID_CURRENT_SITE', 1 );
                 define( 'BLOG_ID_CURRENT_SITE', 1 );
-
+        configs:
+            - source: php-fpm-www-conf
+              target: /usr/local/etc/php-fpm.d/www.conf
         volumes:
             - wordpress-html:/var/www/html
             - wordpress-plugins:/var/www/html/wp-content/plugins
-            - php-fpm-configs:/mnt/php-fpm
-        entrypoint:
-            [
-                "/bin/sh",
-                "-c",
-                "ln -sf /mnt/php-fpm/www.conf /usr/local/etc/php-fpm.d/www.conf && exec docker-entrypoint.sh php-fpm",
-            ]
         networks:
             - intranet
         hostname: "wordpress-{{.Task.Slot}}"
+        ports:
+            - "9000:9000"
         deploy:
             replicas: 3
 
     frontend:
         image: trajectory-frontend
-        ports:
-            - 3000:3000
         networks:
             - intranet
+        ports:
+            - 3000:3000
 
     # Metrics
 
     # Grafana
     grafana:
         image: grafana/grafana:latest
-        ports:
-            - "3001:3000"
+        environment:
+            - GF_SECURITY_ADMIN_PASSWORD=admin        
         volumes:
             - grafana_data:/var/lib/grafana
-        environment:
-            - GF_SECURITY_ADMIN_PASSWORD=admin
         networks:
             - intranet
+        ports:
+            - "3001:3000"
         deploy:
             replicas: 1
             placement:
@@ -123,21 +119,15 @@ services:
     # Metrics source
     prometheus:
         image: prom/prometheus:latest
-        ports:
-            - "9090:9090" # Expose Prometheus UI
+        configs:
+            - source: prometheus-yml
+              target: /etc/prometheus/prometheus.yml
         volumes:
-            - prometheus-configs:/mnt/prometheus
             - prometheus-data:/prometheus
-        entrypoint:
-            [
-                "/bin/prometheus",
-                "--config.file=/mnt/prometheus/prometheus.yml",
-                "--storage.tsdb.path=/prometheus",
-                "--web.console.libraries=/usr/share/prometheus/console_libraries",
-                "--web.console.templates=/usr/share/prometheus/consoles",
-            ]
         networks:
             - intranet
+        ports:
+            - "9090:9090" # Expose Prometheus UI
         deploy:
             replicas: 1
             placement:
@@ -161,16 +151,17 @@ services:
 
     mysql-exporter:
         image: prom/mysqld-exporter
+        environment:
+            MYSQLD_EXPORTER_PASSWORD: ${MYSQL_EXPORTER_PASSWORD}
+        configs:
+            - source: mysql-exporter-configs
+              target: /configs/mysql-exporter/mysqld_exporter.cnf
         networks:
             - intranet
         ports:
             - "9104:9104"
-        environment:
-            MYSQLD_EXPORTER_PASSWORD: ${MYSQL_EXPORTER_PASSWORD}
-        volumes:
-            - mysql-exporter-configs:/mnt/mysql-exporter
         command:
-            - --config.my-cnf=/mnt/mysql-exporter/mysqld_exporter.cnf
+            - --config.my-cnf=/configs/mysql-exporter/mysqld_exporter.cnf
             - --mysqld.address=db:3306
         deploy:
             replicas: 1
@@ -209,6 +200,36 @@ networks:
     intranet:
         external: true
 
+configs:
+    # Nginx
+    nginx-conf:
+        file: ./configs/nginx/nginx.conf
+    nginx-backend-template:
+        file: ./configs/nginx/templates/backend.conf.template
+    nginx-default-template:
+        file: ./configs/nginx/templates/default.conf.template
+    nginx-frontend-template:
+        file: ./configs/nginx/templates/frontend.conf.template
+    nginx-stub-template:
+        file: ./configs/nginx/templates/stub.conf.template
+
+    # MySQL
+    mysql-init-db:
+        file: ./configs/mysql/init-db.sql
+
+    # PHP-FPM
+    php-fpm-www-conf:
+        file: ./configs/php-fpm/www.conf
+
+    # Prometheus
+    prometheus-yml:
+        file: ./configs/prometheus/prometheus.yml
+
+    # Exporters
+    # MySQL exporter
+    mysqld-exporter-cnf:
+        file: ./configs/exporters/mysql/mysqld_exporter.cnf
+
 volumes:
     db:
     prometheus-data:
@@ -226,47 +247,11 @@ volumes:
             o: "addr=${SERVER_IP},rw"
             device: ":/srv/nfs/shared/wordpress/plugins"
 
-    nginx-configs:
-        driver_opts:
-            type: "nfs"
-            o: "addr=${SERVER_IP},rw"
-            device: ":/srv/nfs/shared/configs/nginx"
-
-    php-fpm-configs:
-        driver_opts:
-            type: "nfs"
-            o: "addr=${SERVER_IP},rw"
-            device: ":/srv/nfs/shared/configs/php-fpm"
-
-    mysql-configs:
-        driver_opts:
-            type: "nfs"
-            o: "addr=${SERVER_IP},rw"
-            device: ":/srv/nfs/shared/configs/mysql"
-
-    prometheus-configs:
-        driver_opts:
-            type: "nfs"
-            o: "addr=${SERVER_IP},rw"
-            device: ":/srv/nfs/shared/configs/prometheus"
-
-    mysql-exporter-configs:
-        driver_opts:
-            type: "nfs"
-            o: "addr=${SERVER_IP},rw"
-            device: ":/srv/nfs/shared/configs/exporters/mysql"
 # docker swarm init --advertise-addr
 # docker network create --driver overlay --scope swarm intranet
 
-# chmod +x docker-pull.sh
-# ./docker-pull.sh
-
-# chmod +x deploy.sh
-
-# ./deploy.sh copy
-
-# docker stack services trajectory
-# docker service logs trajectory_
-# docker stack ps trajectory
+# chmod -R +x ./scripts
+# ./scripts/docker-pull.sh
+# ./scripts/deploy.sh update
 
 # docker stack rm trajectory
