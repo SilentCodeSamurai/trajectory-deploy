@@ -16,7 +16,7 @@ services:
             - source: nginx-stub-template
               target: /etc/nginx/templates/stub.conf.template
         volumes:
-            - wordpress-html:/var/www/html
+            - wordpress:/var/www/html:ro
             # - /etc/letsencrypt/live/<domain>/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
             # - /etc/letsencrypt/live/<domain>/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
         networks:
@@ -79,8 +79,7 @@ services:
             - source: php-fpm-www-conf
               target: /usr/local/etc/php-fpm.d/www.conf
         volumes:
-            - wordpress-html:/var/www/html
-            - wordpress-plugins:/var/www/html/wp-content/plugins
+            - wordpress:/var/www/html
         networks:
             - intranet
         hostname: "wordpress-{{.Task.Slot}}"
@@ -235,17 +234,11 @@ volumes:
     prometheus-data:
     grafana_data:
 
-    wordpress-html:
+    wordpress:
         driver_opts:
             type: "nfs"
             o: "addr=${SERVER_IP},rw"
-            device: ":/srv/nfs/shared/wordpress/html"
-
-    wordpress-plugins:
-        driver_opts:
-            type: "nfs"
-            o: "addr=${SERVER_IP},rw"
-            device: ":/srv/nfs/shared/wordpress/plugins"
+            device: ":/srv/nfs/shared/wordpress"
 
 # docker swarm init --advertise-addr
 # docker network create --driver overlay --scope swarm intranet
