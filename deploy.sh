@@ -9,19 +9,33 @@ if [ -z "$STACK_NAME" ]; then
     exit 1
 fi
 
-# Function to run NFS copy
-run_nfs_copy() {
-    echo "Running NFS copy process..."
-    ./nfs-copy.sh
+# Function to run NFS update
+run_nfs_update() {
+    echo "Running NFS update process..."
+    ./nfs-update.sh
     if [ $? -ne 0 ]; then
-        echo "NFS copy failed."
+        echo "NFS update failed."
+        exit 1
+    fi
+}
+
+run_nfs_reset() {
+    echo "Running NFS reset process..."
+    ./nfs-reset.sh
+    if [ $? -ne 0 ]; then
+        echo "NFS reset failed."
         exit 1
     fi
 }
 
 # Check if the "copy" argument is provided
-if [ "$1" == "copy" ]; then
-    run_nfs_copy
+if [ "$1" == "update" ]; then
+    run_nfs_update
+fi
+
+# Check if the "reset" argument is provided
+if [ "$1" == "reset" ]; then
+    run_nfs_reset
 fi
 
 # Use the loaded environment variables
