@@ -16,7 +16,7 @@ services:
             - source: nginx-stub-template
               target: /etc/nginx/templates/stub.conf.template
         volumes:
-            - wordpress:/var/www/html:ro
+            - wordpress-data:/var/www/html:ro
             # - /etc/letsencrypt/live/<domain>/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
             # - /etc/letsencrypt/live/<domain>/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
         networks:
@@ -79,7 +79,7 @@ services:
             - source: php-fpm-www-conf
               target: /usr/local/etc/php-fpm.d/www.conf
         volumes:
-            - wordpress:/var/www/html
+            - wordpress-data:/var/www/html
         networks:
             - intranet
         hostname: "wordpress-{{.Task.Slot}}"
@@ -234,7 +234,7 @@ volumes:
     prometheus-data:
     grafana_data:
 
-    wordpress:
+    wordpress-data:
         driver_opts:
             type: "nfs"
             o: "addr=${SERVER_IP},rw"
