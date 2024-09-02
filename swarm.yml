@@ -69,12 +69,12 @@ services:
                 define('WP_DEBUG_LOG', true );
                 define('WP_ALLOW_MULTISITE', true);
 
-                define( 'MULTISITE', true );
-                define( 'SUBDOMAIN_INSTALL', true );
-                define( 'DOMAIN_CURRENT_SITE', '${BACKEND_SERVER_NAME}' );
-                define( 'PATH_CURRENT_SITE', '/' );
-                define( 'SITE_ID_CURRENT_SITE', 1 );
-                define( 'BLOG_ID_CURRENT_SITE', 1 );
+            # define( 'MULTISITE', true );
+            # define( 'SUBDOMAIN_INSTALL', true );
+            # define( 'DOMAIN_CURRENT_SITE', '${BACKEND_SERVER_NAME}' );
+            # define( 'PATH_CURRENT_SITE', '/' );
+            # define( 'SITE_ID_CURRENT_SITE', 1 );
+            # define( 'BLOG_ID_CURRENT_SITE', 1 );
         configs:
             - source: php-fpm-www-conf
               target: /usr/local/etc/php-fpm.d/www.conf
