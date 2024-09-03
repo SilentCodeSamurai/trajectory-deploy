@@ -43,8 +43,8 @@ services:
         configs:
             - source: mysql-init-db
               target: /docker-entrypoint-initdb.d/init-db.sql
-            - source: mysql-connections-cnf
-              target: /etc/mysql/conf.d/connections.cnf
+            - source: mysql-performance-cnf
+              target: /etc/mysql/conf.d/performance.cnf
         volumes:
             - db:/var/lib/mysql
         networks:
@@ -217,8 +217,8 @@ configs:
         file: ./configs/nginx/templates/stub.conf.template
 
     # MySQL
-    mysql-connections-cnf:
-        file: ./configs/mysql/connections.cnf
+    mysql-performance-cnf:
+        file: ./configs/mysql/performance.cnf
     mysql-init-db:
         file: ./configs/mysql/init-db.sql
 
