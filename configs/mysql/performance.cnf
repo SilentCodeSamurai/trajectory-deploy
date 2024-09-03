@@ -9,7 +9,6 @@ innodb_flush_method = O_DIRECT
 innodb_file_per_table = 1
 innodb_stats_on_metadata = 0
 innodb_buffer_pool_instances = 8
-query_cache_type = 0
 query_cache_size = 0
 
 max_connections = 502
