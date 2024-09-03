@@ -6,5 +6,5 @@ Deployment of wordpress fpm nginx and react app with docker.
 
 19908 - cAdvisor
 15796 - php-fpm
-14057
-12708
+14057 - Mysql
+12708 - Nginx

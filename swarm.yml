@@ -78,6 +78,8 @@ services:
         configs:
             - source: php-fpm-www-conf
               target: /usr/local/etc/php-fpm.d/www.conf
+            - source: php-fpm-resources-ini
+              target: $PHP_INI_DIR/conf.d/resources.ini
         volumes:
             - wordpress-data:/var/www/html
         networks:
@@ -219,6 +221,8 @@ configs:
     # PHP-FPM
     php-fpm-www-conf:
         file: ./configs/php-fpm/www.conf
+    php-fpm-resources-ini:
+        file: ./configs/php-fpm/resources.ini
 
     # Prometheus
     prometheus-yml:
