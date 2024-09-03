@@ -79,7 +79,7 @@ services:
             - source: php-fpm-www-conf
               target: /usr/local/etc/php-fpm.d/www.conf
             - source: php-fpm-resources-ini
-              target: $PHP_INI_DIR/conf.d/resources.ini
+              target: /usr/local/etc/php/conf.d/resources.ini
         volumes:
             - wordpress-data:/var/www/html
         networks:
