@@ -90,10 +90,15 @@ services:
         ports:
             - "9000:9000"
         deploy:
-            replicas: 1
+            replicas: 2
             placement:
                 constraints: [node.role == worker]
-
+            resources:
+                limits:
+                    cpus: "7.0"
+                reservations:
+                    cpus: "6.0"
+                
     frontend:
         image: nginx:latest
         networks:
