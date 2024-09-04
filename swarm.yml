@@ -90,7 +90,9 @@ services:
         ports:
             - "9000:9000"
         deploy:
-            replicas: 3
+            replicas: 8
+            placement:
+                constraints: [node.role == worker]
 
     frontend:
         image: nginx:latest
@@ -105,7 +107,7 @@ services:
     grafana:
         image: grafana/grafana:latest
         environment:
-            - GF_SECURITY_ADMIN_PASSWORD=admin        
+            - GF_SECURITY_ADMIN_PASSWORD=admin
         volumes:
             - grafana_data:/var/lib/grafana
         networks:
@@ -180,7 +182,9 @@ services:
         networks:
             - intranet
         deploy:
-            replicas: 3
+            replicas: 8
+            placement:
+                constraints: [node.role == worker]
             restart_policy:
                 condition: on-failure
 
@@ -247,7 +251,6 @@ volumes:
             type: "nfs"
             o: "addr=${SERVER_IP},rw"
             device: ":/srv/nfs/shared/wordpress"
-
 # docker swarm init --advertise-addr
 # docker network create --driver overlay --scope swarm intranet
 
@@ -255,4 +258,6 @@ volumes:
 # ./scripts/docker-pull.sh
 # ./scripts/deploy.sh update
 
+# docker service update --constraint-add 'node.role == worker' --constraint-rm 'node.role == manager' web
+# docker service scale web=3
 # docker stack rm trajectory
