@@ -93,11 +93,6 @@ services:
             replicas: 1
             placement:
                 constraints: [node.role == worker]
-            resources:
-                limits:
-                    cpus: "7.0"
-                reservations:
-                    cpus: "6.0"
                 
     frontend:
         image: nginx:latest
