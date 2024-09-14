@@ -20,8 +20,8 @@ services:
             - source: nginx-stub-template
               target: /etc/nginx/templates/stub.conf.template
         secrets:
-            - cert_crt
-            - cert_key
+            - cert.crt
+            - cert.key
 
         volumes:
             - wordpress-data:/var/www/html:ro
@@ -251,9 +251,9 @@ configs:
         file: ./configs/exporters/mysql/mysqld_exporter.cnf
 
 secrets:
-    cert_crt:
+    cert.crt:
         file: /etc/letsencrypt/live/kam-life-pro.ru/fullchain.pem
-    cert_key:
+    cert.key:
         file: /etc/letsencrypt/live/kam-life-pro.ru/privkey.pem
 
 volumes:
