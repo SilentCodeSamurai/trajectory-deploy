@@ -17,8 +17,9 @@ services:
               target: /etc/nginx/templates/stub.conf.template
         volumes:
             - wordpress-data:/var/www/html:ro
-            # - /etc/letsencrypt/live/<domain>/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
-            # - /etc/letsencrypt/live/<domain>/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
+            - /etc/letsencrypt/live/kam-life-pro.ru/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
+            - /etc/letsencrypt/live/kam-life-pro.ru/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
+            
         networks:
             - intranet
         ports:
