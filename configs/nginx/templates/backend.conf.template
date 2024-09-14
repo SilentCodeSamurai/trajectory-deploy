@@ -11,6 +11,9 @@ server {
     listen [::]:443 ssl;
     server_name ${BACKEND_SERVER_NAME};
 
+    ssl_certificate $ssl_certificate;
+    ssl_certificate_key $ssl_certificate_key;
+
     index index.php index.html index.htm;
     root /var/www/html;
     server_tokens off;

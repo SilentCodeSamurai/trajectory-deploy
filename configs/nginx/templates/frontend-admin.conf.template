@@ -3,6 +3,10 @@ server {
     listen 443 ssl;
     listen [::]:443 ssl;
     server_name ${FRONTEND_ADMIN_SERVER_NAME};
+
+    ssl_certificate $ssl_certificate;
+    ssl_certificate_key $ssl_certificate_key;
+
     location / {
         proxy_pass http://frontend-admin:3000;
     }
