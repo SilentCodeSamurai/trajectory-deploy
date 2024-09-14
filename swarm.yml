@@ -3,7 +3,9 @@ services:
         image: nginx:latest
         environment:
             - BACKEND_SERVER_NAME=${BACKEND_SERVER_NAME}
-            - FRONTEND_SERVER_NAME=${FRONTEND_SERVER_NAME}
+            - FRONTEND_CLIENT_SERVER_NAME=${FRONTEND_CLIENT_SERVER_NAME}
+            - FRONTEND_ADMIN_SERVER_NAME=${FRONTEND_ADMIN_SERVER_NAME}
+            
         configs:
             - source: nginx-conf
               target: /etc/nginx/nginx.conf
@@ -11,15 +13,17 @@ services:
               target: /etc/nginx/templates/backend.conf.template
             - source: nginx-default-template
               target: /etc/nginx/templates/default.conf.template
-            - source: nginx-frontend-template
-              target: /etc/nginx/templates/frontend.conf.template
+            - source: nginx-frontend-client-template
+              target: /etc/nginx/templates/frontend-client.conf.template
+            - source: nginx-frontend-admin-template
+              target: /etc/nginx/templates/frontend-admin.conf.template
             - source: nginx-stub-template
               target: /etc/nginx/templates/stub.conf.template
         volumes:
             - wordpress-data:/var/www/html:ro
             - /etc/letsencrypt/live/kam-life-pro.ru/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
             - /etc/letsencrypt/live/kam-life-pro.ru/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
-            
+
         networks:
             - intranet
         ports:
@@ -94,13 +98,16 @@ services:
             replicas: 1
             placement:
                 constraints: [node.role == worker]
-                
-    frontend:
-        image: nginx:latest
+
+    frontend-client:
+        image: trajectory-frontend-client
         networks:
             - intranet
-        ports:
-            - 3000:3000
+
+    frontend-admin:
+        image: trajectory-frontend-admin
+        networks:
+            - intranet
 
     # Metrics
 
@@ -216,8 +223,10 @@ configs:
         file: ./configs/nginx/templates/backend.conf.template
     nginx-default-template:
         file: ./configs/nginx/templates/default.conf.template
-    nginx-frontend-template:
-        file: ./configs/nginx/templates/frontend.conf.template
+    nginx-frontend-client-template:
+        file: ./configs/nginx/templates/frontend-client.conf.template
+    nginx-frontend-admin-template:
+        file: ./configs/nginx/templates/frontend-admin.conf.template
     nginx-stub-template:
         file: ./configs/nginx/templates/stub.conf.template
 

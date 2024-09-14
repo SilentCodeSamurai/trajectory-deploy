@@ -13,4 +13,5 @@ COPY ./build /usr/share/nginx/html
 
 ENTRYPOINT ["nginx", "-g", "daemon off;"]
 
-# docker build -t trajectory-frontend .
+# docker build -t trajectory-frontend-client .
+# docker build -t trajectory-frontend-admin .

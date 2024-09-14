@@ -1,8 +1,8 @@
 server {
     listen 8123;
-    server_name ${FRONTEND_SERVER_NAME};
 
     location / {
-        proxy_pass http://frontend:3000;
+        return 200 "Hello World!";
+        add_header Content-Type text/plain;
     }
 }
