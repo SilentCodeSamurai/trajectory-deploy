@@ -97,12 +97,12 @@ services:
             replicas: 1
 
     frontend-client:
-        image: trajectory-frontend-client:7
+        image: trajectory-frontend-client:8
         networks:
             - intranet
 
     frontend-admin:
-        image: trajectory-frontend-admin:7
+        image: trajectory-frontend-admin:8
         networks:
             - intranet
 
