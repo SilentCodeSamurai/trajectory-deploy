@@ -1,3 +1,4 @@
 /shared/wordpress/wp-content/plugins/*/
 frontend-builder/build/
 swarm.local.yml
+.env

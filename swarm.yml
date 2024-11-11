@@ -31,7 +31,7 @@ services:
             - "80:80"
             - "443:443"
             - "8080:8080"
-
+    
         deploy:
             replicas: 1
             placement:
@@ -65,7 +65,7 @@ services:
                 condition: on-failure
 
     wordpress:
-        image: wordpress:php8.1-fpm
+        image: wordpress:6.6-php8.1-fpm-alpine
         environment:
             WORDPRESS_DB_HOST: db
             WORDPRESS_DB_USER: ${MYSQL_USER}
@@ -188,8 +188,6 @@ services:
             - intranet
         deploy:
             replicas: 1
-            placement:
-                constraints: [node.role == worker]
             restart_policy:
                 condition: on-failure
 
