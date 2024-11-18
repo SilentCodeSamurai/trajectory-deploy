@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# restore_mysql_backup.sh
+
 # Load environment variables from the load-env.sh file
 source ./load-env.sh
 
@@ -19,6 +21,24 @@ if [ ! -f "$BACKUP_FILE" ]; then
     exit 1
 fi
 
+# Get the task ID for the service
+TASK_ID=$(docker service ps --filter "desired-state=running" --format "{{.ID}}" "$SERVICE_NAME" | head -n 1)
+
+# Check if a task was found
+if [ -z "$TASK_ID" ]; then
+    echo "Error: No running task found for service '$SERVICE_NAME'."
+    exit 1
+fi
+
+# Get the container ID from the task ID
+CONTAINER_ID=$(docker inspect --format '{{.Status.ContainerStatus.ContainerID}}' "$TASK_ID")
+
+# Check if a container ID was found
+if [ -z "$CONTAINER_ID" ]; then
+    echo "Error: No container found for task ID '$TASK_ID'."
+    exit 1
+fi
+
 # Decompress the backup file if it is gzipped
 if [[ "$BACKUP_FILE" == *.gz ]]; then
     echo "Decompressing backup file..."
@@ -26,21 +46,9 @@ if [[ "$BACKUP_FILE" == *.gz ]]; then
     BACKUP_FILE="/tmp/mysql_backup.sql"
 fi
 
-# Get the container ID for the service
-CONTAINER_ID=$(docker service ps --no-trunc -q "$SERVICE_NAME" | head -n 1)
-
-# Check if a container was found
-if [ -z "$CONTAINER_ID" ]; then
-    echo "Error: No running container found for service '$SERVICE_NAME'."
-    exit 1
-fi
-
 # Run mysql command to restore the database using the container ID
 echo "Restoring backup for container: $CONTAINER_ID"
-docker exec -i "$CONTAINER_ID" /usr/bin/mysql -u root --password="$MYSQL_ROOT_PASSWORD" < "$BACKUP_FILE"
-
-# Check if the restore command was successful
-if [ $? -eq 0 ]; then
+if docker exec -i "$CONTAINER_ID" /usr/bin/mysql -u root --password="$MYSQL_ROOT_PASSWORD" < "$BACKUP_FILE"; then
     echo "Database restored successfully from '$BACKUP_FILE'."
     # Clean up the temporary SQL file if it was created
     if [ -f /tmp/mysql_backup.sql ]; then
