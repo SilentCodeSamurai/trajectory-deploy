@@ -4,7 +4,7 @@
 source ./load-env.sh
 
 # Define variables
-CONTAINER_NAME="${STACK_NAME}_db"
+SERVICE_NAME="${STACK_NAME}_db"
 BACKUP_FILE="$1"
 
 # Check if a backup file was provided
@@ -26,7 +26,16 @@ if [[ "$BACKUP_FILE" == *.gz ]]; then
     BACKUP_FILE="/tmp/mysql_backup.sql"
 fi
 
-# Run mysql command to restore the database inside the MySQL container
+# Get the container ID for the service
+CONTAINER_NAME=$(docker service ps -q "$SERVICE_NAME" | head -n 1)
+
+# Check if a container was found
+if [ -z "$CONTAINER_NAME" ]; then
+    echo "Error: No running container found for service '$SERVICE_NAME'."
+    exit 1
+fi
+
+# Run mysql command to restore the database using the container name
 echo "Restoring backup for container: $CONTAINER_NAME"
 docker exec -i "$CONTAINER_NAME" /usr/bin/mysql -u root --password="$MYSQL_ROOT_PASSWORD" < "$BACKUP_FILE"
 
