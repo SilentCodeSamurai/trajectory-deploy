@@ -27,17 +27,17 @@ if [[ "$BACKUP_FILE" == *.gz ]]; then
 fi
 
 # Get the container ID for the service
-CONTAINER_NAME=$(docker service ps -q "$SERVICE_NAME" | head -n 1)
+CONTAINER_ID=$(docker service ps --no-trunc -q "$SERVICE_NAME" | head -n 1)
 
 # Check if a container was found
-if [ -z "$CONTAINER_NAME" ]; then
+if [ -z "$CONTAINER_ID" ]; then
     echo "Error: No running container found for service '$SERVICE_NAME'."
     exit 1
 fi
 
-# Run mysql command to restore the database using the container name
-echo "Restoring backup for container: $CONTAINER_NAME"
-docker exec -i "$CONTAINER_NAME" /usr/bin/mysql -u root --password="$MYSQL_ROOT_PASSWORD" < "$BACKUP_FILE"
+# Run mysql command to restore the database using the container ID
+echo "Restoring backup for container: $CONTAINER_ID"
+docker exec -i "$CONTAINER_ID" /usr/bin/mysql -u root --password="$MYSQL_ROOT_PASSWORD" < "$BACKUP_FILE"
 
 # Check if the restore command was successful
 if [ $? -eq 0 ]; then
