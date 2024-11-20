@@ -94,10 +94,10 @@ services:
             - intranet
         hostname: "wordpress-{{.Task.Slot}}"
         deploy:
-            replicas: 2
+            replicas: 1
 
     frontend-client:
-        image: trajectory-frontend-client:17
+        image: trajectory-frontend-client:18
         networks:
             - intranet
         deploy:
@@ -108,7 +108,7 @@ services:
                 condition: on-failure
 
     frontend-admin:
-        image: trajectory-frontend-admin:17
+        image: trajectory-frontend-admin:18
         networks:
             - intranet
         deploy:
@@ -199,7 +199,7 @@ services:
         networks:
             - intranet
         deploy:
-            replicas: 2
+            replicas: 1
             restart_policy:
                 condition: on-failure
 
