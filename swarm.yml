@@ -97,7 +97,7 @@ services:
             replicas: 1
 
     frontend-client:
-        image: trajectory-frontend-client:20
+        image: trajectory-frontend-client:21
         networks:
             - intranet
         deploy:
@@ -108,7 +108,7 @@ services:
                 condition: on-failure
 
     frontend-admin:
-        image: trajectory-frontend-admin:20
+        image: trajectory-frontend-admin:21
         networks:
             - intranet
         deploy:
