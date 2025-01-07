@@ -5,7 +5,6 @@ services:
             - BACKEND_SERVER_NAME=${BACKEND_SERVER_NAME}
             - FRONTEND_CLIENT_SERVER_NAME=${FRONTEND_CLIENT_SERVER_NAME}
             - FRONTEND_ADMIN_SERVER_NAME=${FRONTEND_ADMIN_SERVER_NAME}
-
         configs:
             - source: nginx-conf
               target: /etc/nginx/nginx.conf
@@ -24,6 +23,7 @@ services:
             - cert.key
 
         volumes:
+            - ./configs/nginx/index.html:/usr/share/nginx/html/index.html
             - wordpress-data:/var/www/html:ro
         networks:
             - intranet
