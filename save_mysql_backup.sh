@@ -20,22 +20,32 @@ MYSQL_BACKUP_EMAIL_TO=${MYSQL_BACKUP_EMAIL_TO:-""}  # Default to empty if not se
 
 # Define the backup file
 BACKUP_FILE="${MYSQL_BACKUP_FOLDER}/backup_${TIMESTAMP}.sql.gz"
+SPLIT_PREFIX="${MYSQL_BACKUP_FOLDER}/backup_${TIMESTAMP}_part_"
+SPLIT_SIZE="29M"  # Maximum size of each split file
 
 # Email settings
 EMAIL_SUBJECT="MySQL Backup - ${TIMESTAMP}"
-EMAIL_BODY="Please find the attached MySQL backup file."
+EMAIL_BODY="Please find the attached MySQL backup files."
 
 # Run the create_mysql_backup.sh script with the backup folder as an argument
 log "Starting MySQL backup process."
 if ./create_mysql_backup.sh "$BACKUP_FILE"; then
     log "MySQL backup completed successfully."
     
+    # Split the backup file into parts
+    log "Splitting backup file into parts of size ${SPLIT_SIZE}."
+    split -b "$SPLIT_SIZE" "$BACKUP_FILE" "$SPLIT_PREFIX"
+
     # Check if email is set before sending
     if [[ -n "$MYSQL_BACKUP_EMAIL_TO" ]]; then
-        if echo "$EMAIL_BODY" | mail -s "$EMAIL_SUBJECT" -A "$BACKUP_FILE" "$MYSQL_BACKUP_EMAIL_TO"; then
-            log "Backup file sent to $MYSQL_BACKUP_EMAIL_TO."
+        # Create a temporary file list for attachments
+        ATTACHMENTS=$(ls ${SPLIT_PREFIX}* | tr '\n' ' ')
+
+        # Send email with all split files as attachments
+        if echo "$EMAIL_BODY" | mail -s "$EMAIL_SUBJECT" $ATTACHMENTS "$MYSQL_BACKUP_EMAIL_TO"; then
+            log "Backup files sent to $MYSQL_BACKUP_EMAIL_TO."
         else
-            log "Failed to send backup file to $MYSQL_BACKUP_EMAIL_TO."
+            log "Failed to send backup files to $MYSQL_BACKUP_EMAIL_TO."
         fi
     else
         log "No email recipient specified. Skipping email notification."
@@ -44,6 +54,9 @@ else
     log "MySQL backup failed."
     exit 1
 fi
+
+# Clean up split files after sending email
+rm -f ${SPLIT_PREFIX}*
 
 # chmod +x save_mysql_backup.sh
 # crontab -e
