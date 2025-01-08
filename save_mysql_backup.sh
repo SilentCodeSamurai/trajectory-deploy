@@ -23,10 +23,6 @@ BACKUP_FILE="${MYSQL_BACKUP_FOLDER}/backup_${TIMESTAMP}.sql.gz"
 SPLIT_PREFIX="${MYSQL_BACKUP_FOLDER}/backup_${TIMESTAMP}_part_"
 SPLIT_SIZE="29M"  # Maximum size of each split file
 
-# Email settings
-EMAIL_SUBJECT="MySQL Backup - ${TIMESTAMP}"
-EMAIL_BODY="Please find the attached MySQL backup files."
-
 # Run the create_mysql_backup.sh script with the backup folder as an argument
 log "Starting MySQL backup process."
 if ./create_mysql_backup.sh "$BACKUP_FILE"; then
@@ -38,15 +34,17 @@ if ./create_mysql_backup.sh "$BACKUP_FILE"; then
 
     # Check if email is set before sending
     if [[ -n "$MYSQL_BACKUP_EMAIL_TO" ]]; then
-        # Create a temporary file list for attachments
-        ATTACHMENTS=$(ls ${SPLIT_PREFIX}* | tr '\n' ' ')
+        # Loop through split files and attach them as attachments
+        for SPLIT_FILE in ${SPLIT_PREFIX}*; do
+            EMAIL_SUBJECT="MySQL Backup Part - ${TIMESTAMP} - ${SPLIT_FILE##*/}"
+            EMAIL_BODY="Backup Part - ${TIMESTAMP} - ${SPLIT_FILE##*/}"
 
-        # Send email with all split files as attachments
-        if echo "$EMAIL_BODY" | mail -s "$EMAIL_SUBJECT" $ATTACHMENTS "$MYSQL_BACKUP_EMAIL_TO"; then
-            log "Backup files sent to $MYSQL_BACKUP_EMAIL_TO."
-        else
-            log "Failed to send backup files to $MYSQL_BACKUP_EMAIL_TO."
-        fi
+            if echo "$EMAIL_BODY" | mail -s "$EMAIL_SUBJECT" -A "$SPLIT_FILE" "$MYSQL_BACKUP_EMAIL_TO"; then
+                log "Backup part sent to $MYSQL_BACKUP_EMAIL_TO."
+            else
+                log "Failed to send backup part to $MYSQL_BACKUP_EMAIL_TO."
+            fi
+        done
     else
         log "No email recipient specified. Skipping email notification."
     fi
