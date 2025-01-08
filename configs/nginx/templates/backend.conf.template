@@ -61,8 +61,6 @@ server {
     }
 
     location / {
-        allow 127.0.0.1;
-        deny all;
         try_files $uri $uri/ /index.php$is_args$args;
     }
 
