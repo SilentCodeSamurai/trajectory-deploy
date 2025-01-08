@@ -32,19 +32,23 @@ if ./create_mysql_backup.sh "$BACKUP_FILE"; then
     log "Splitting backup file into parts of size ${SPLIT_SIZE}."
     split -b "$SPLIT_SIZE" "$BACKUP_FILE" "$SPLIT_PREFIX"
 
+    TOTAL_PARTS=$(ls ${SPLIT_PREFIX}* | wc -l)
+
     # Check if email is set before sending
     if [[ -n "$MYSQL_BACKUP_EMAIL_TO" ]]; then
         # Loop through split files and attach them as attachments
+        CURRENT_PART=1
         for SPLIT_FILE in ${SPLIT_PREFIX}*; do
-            EMAIL_SUBJECT="MySQL Backup Part - ${TIMESTAMP} - ${SPLIT_FILE##*/}"
-            EMAIL_BODY="Backup Part - ${TIMESTAMP} - ${SPLIT_FILE##*/}"
+            EMAIL_SUBJECT="MySQL Backup Part - ${TIMESTAMP} - ${CURRENT_PART}/${TOTAL_PARTS} - ${SPLIT_FILE##*/}"
+            EMAIL_BODY="Backup Part - ${TIMESTAMP} - ${CURRENT_PART}/${TOTAL_PARTS} - ${SPLIT_FILE##*/}"
 
             if echo "$EMAIL_BODY" | mail -s "$EMAIL_SUBJECT" -A "$SPLIT_FILE" "$MYSQL_BACKUP_EMAIL_TO"; then
-                log "Backup part sent to $MYSQL_BACKUP_EMAIL_TO."
+                log "Backup part ${CURRENT_PART} / ${TOTAL_PARTS} sent to $MYSQL_BACKUP_EMAIL_TO."
             else
                 log "Failed to send backup part to $MYSQL_BACKUP_EMAIL_TO."
             fi
-            sleep 5
+            sleep 1
+            CURRENT_PART=$((CURRENT_PART + 1))
         done
     else
         log "No email recipient specified. Skipping email notification."
