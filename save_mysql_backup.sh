@@ -39,7 +39,7 @@ if ./create_mysql_backup.sh "$BACKUP_FILE"; then
             EMAIL_SUBJECT="MySQL Backup Part - ${TIMESTAMP} - ${SPLIT_FILE##*/}"
             EMAIL_BODY="Backup Part - ${TIMESTAMP} - ${SPLIT_FILE##*/}"
 
-            if echo "$EMAIL_BODY" | mail -s "$EMAIL_SUBJECT" -a "$SPLIT_FILE" "$MYSQL_BACKUP_EMAIL_TO"; then
+            if echo "$EMAIL_BODY" | mail -s "$EMAIL_SUBJECT" -A "$SPLIT_FILE" "$MYSQL_BACKUP_EMAIL_TO"; then
                 log "Backup part sent to $MYSQL_BACKUP_EMAIL_TO."
             else
                 log "Failed to send backup part to $MYSQL_BACKUP_EMAIL_TO."
