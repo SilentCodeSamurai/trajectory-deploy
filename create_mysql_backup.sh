@@ -2,12 +2,18 @@
 
 # create_mysql_backup.sh
 
+# Check if the backup file name argument is provided
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <backup_file_name>"
+    exit 1
+fi
+
 # Load environment variables from the load-env.sh file
 source ./load-env.sh
 
 # Define variables
+BACKUP_FILE="$1"
 SERVICE_NAME="${STACK_NAME}_db"
-BACKUP_FILE="/root/mysql_backups/mysql_backup_$(date +%Y%m%d_%H%M%S).sql.gz"
 
 # Get the task ID for the service
 TASK_ID=$(docker service ps --filter "desired-state=running" --format "{{.ID}}" "$SERVICE_NAME" | head -n 1)
@@ -37,4 +43,4 @@ else
 fi
 
 # chmod +x create_mysql_backup.sh
-# ./create_mysql_backup.sh
+# ./create_mysql_backup.sh <backup_file_name>
