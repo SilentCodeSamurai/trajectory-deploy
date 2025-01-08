@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# manage_mysql_backup.sh
+# save_mysql_backup.sh
 
 # Load environment variables from .env file
 set -o allexport
@@ -14,8 +14,7 @@ log() {
 # Define the timestamp
 TIMESTAMP=$(date +'%Y-%m-%d_%H-%M-%S')
 
-# Get values from environment variables or set defaults
-MYSQL_BACKUP_DAYS_TO_KEEP=${MYSQL_BACKUP_DAYS_TO_KEEP:-7}
+# Get values from environment variables or set default
 MYSQL_BACKUP_FOLDER=${MYSQL_BACKUP_FOLDER:-"/root/mysql_backups"}
 MYSQL_BACKUP_EMAIL_TO=${MYSQL_BACKUP_EMAIL_TO:-""}  # Default to empty if not set
 
@@ -46,12 +45,6 @@ else
     exit 1
 fi
 
-# Delete backups older than the specified number of days
-log "Deleting backups older than $MYSQL_BACKUP_DAYS_TO_KEEP days."
-find "$MYSQL_BACKUP_FOLDER" -type f -name "*.sql.gz" -mtime +"$MYSQL_BACKUP_DAYS_TO_KEEP" -exec rm {} \; -exec log "Deleted backup: {}" \;
-
-log "Backup management process completed."
-
-# chmod +x manage_mysql_backup.sh
+# chmod +x save_mysql_backup.sh
 # crontab -e
-# 0 */12 * * * /path/to/manage_mysql_backup.sh >> /root/log/mysql_backup.log
+# 0 */12 * * * /path/to/save_mysql_backup.sh >> /root/log/save_mysql_backup.log

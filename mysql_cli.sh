@@ -28,6 +28,6 @@ if [ -z "$CONTAINER_ID" ]; then
 fi
 
 # Connect to the MySQL container
-docker exec -it "$CONTAINER_ID" -u root --password="$MYSQL_ROOT_PASSWORD" mysql
+docker exec -it "$CONTAINER_ID" mysql -u root --password="$MYSQL_ROOT_PASSWORD" 
 
 # chmod +x mysql_cli.sh
