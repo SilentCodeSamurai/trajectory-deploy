@@ -21,7 +21,7 @@ MYSQL_BACKUP_EMAIL_TO=${MYSQL_BACKUP_EMAIL_TO:-""}  # Default to empty if not se
 # Define the backup file
 BACKUP_FILE="${MYSQL_BACKUP_FOLDER}/backup_${TIMESTAMP}.sql.gz"
 SPLIT_PREFIX="${MYSQL_BACKUP_FOLDER}/backup_${TIMESTAMP}_part_"
-SPLIT_SIZE="29M"  # Maximum size of each split file
+SPLIT_SIZE="20M"  # Maximum size of each split file
 
 # Run the create_mysql_backup.sh script with the backup folder as an argument
 log "Starting MySQL backup process."
@@ -39,7 +39,7 @@ if ./create_mysql_backup.sh "$BACKUP_FILE"; then
             EMAIL_SUBJECT="MySQL Backup Part - ${TIMESTAMP} - ${SPLIT_FILE##*/}"
             EMAIL_BODY="Backup Part - ${TIMESTAMP} - ${SPLIT_FILE##*/}"
 
-            if echo "$EMAIL_BODY" | mail -s "$EMAIL_SUBJECT" -A "$SPLIT_FILE" "$MYSQL_BACKUP_EMAIL_TO"; then
+            if echo "$EMAIL_BODY" | mail -s "$EMAIL_SUBJECT" -a "$SPLIT_FILE" "$MYSQL_BACKUP_EMAIL_TO"; then
                 log "Backup part sent to $MYSQL_BACKUP_EMAIL_TO."
             else
                 log "Failed to send backup part to $MYSQL_BACKUP_EMAIL_TO."
