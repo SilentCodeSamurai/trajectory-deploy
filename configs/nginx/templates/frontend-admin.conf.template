@@ -10,8 +10,8 @@ server {
     charset utf-8; 
     
     location / {
-        root /usr/share/nginx/html;
-        index index.html;
-        # proxy_pass http://frontend-admin:3000;
+        # root /usr/share/nginx/html;
+        # index index.html;
+        proxy_pass http://frontend-admin:3000;
     }
 }
