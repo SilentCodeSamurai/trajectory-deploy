@@ -28,6 +28,7 @@ server {
     error_log /var/log/nginx/wordpress.error.log;
 
     # some security headers ( optional )
+    
     add_header X-Frame-Options "SAMEORIGIN" always;
     add_header X-XSS-Protection "1; mode=block" always;
     add_header X-Content-Type-Options "nosniff" always;
@@ -54,6 +55,7 @@ server {
         }
 
         # Handle actual requests
+        add_header X-A-Key '${X_A_KEY}';
         add_header 'Access-Control-Allow-Origin' '*';
         add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE';
         add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization, X-Requested-With';
@@ -61,10 +63,16 @@ server {
     }
 
     location / {
+        if ($http_x_a_key != '${X_A_KEY}') {
+            return 404;
+        }
         try_files $uri $uri/ /index.php$is_args$args;
     }
 
     location ~ \.php$ {
+        if ($http_x_a_key != "${X_A_KEY}") {
+            return 404;
+        }
         add_header 'Access-Control-Allow-Origin' '*';
         add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE';
         add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization, X-Requested-With';
