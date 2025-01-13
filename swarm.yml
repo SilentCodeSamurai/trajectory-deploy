@@ -69,7 +69,6 @@ services:
         image: phpmyadmin/phpmyadmin:latest
         environment:
             - PMA_HOST=db
-            - PMA_USER=${MYSQL_USER}
         networks:
             - intranet
         ports:
