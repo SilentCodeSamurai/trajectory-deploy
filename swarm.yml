@@ -5,6 +5,7 @@ services:
             - BACKEND_SERVER_NAME=${BACKEND_SERVER_NAME}
             - FRONTEND_CLIENT_SERVER_NAME=${FRONTEND_CLIENT_SERVER_NAME}
             - FRONTEND_ADMIN_SERVER_NAME=${FRONTEND_ADMIN_SERVER_NAME}
+            - X_A_KEY=${X_A_KEY}
         configs:
             - source: nginx-conf
               target: /etc/nginx/nginx.conf
