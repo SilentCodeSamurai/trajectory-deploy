@@ -25,7 +25,7 @@ SPLIT_SIZE="5M"  # Maximum size of each split file
 
 # Run the create_mysql_backup.sh script with the backup folder as an argument
 log "Starting MySQL backup process."
-if ./root/trajectory-deploy/create_mysql_backup.sh "$BACKUP_FILE"; then
+if /root/trajectory-deploy/create_mysql_backup.sh "$BACKUP_FILE"; then
     log "MySQL backup completed successfully."
     
     # Split the backup file into parts
