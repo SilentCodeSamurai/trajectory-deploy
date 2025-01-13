@@ -13,8 +13,8 @@ COPY ./build /usr/share/nginx/html
 
 ENTRYPOINT ["nginx", "-g", "daemon off;"]
 
-# docker build -t trajectory-frontend-client:22 .
-# docker build -t trajectory-frontend-admin:22 .
+# docker build -t trajectory-frontend-client:23 .
+# docker build -t trajectory-frontend-admin:23 .
 
 # docker tag trajectory-frontend-client localhost:5000/trajectory-frontend-client:latest
 # docker tag trajectory-frontend-admin:2 localhost:5000/trajectory-frontend-admin:2
