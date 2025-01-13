@@ -42,6 +42,12 @@ server {
         add_header Cache-Control "public, no-transform";
     }
 
+    location / {
+        if ($uri !~ ^/graphql) {
+            return 403;
+        }
+    }
+
     location /graphql {
         # Handle preflight requests (OPTIONS method)
         if ($request_method = 'OPTIONS') {
@@ -55,7 +61,6 @@ server {
         }
 
         # Handle actual requests
-        proxy_set_header X-A-Key ${X_A_KEY};
         add_header 'Access-Control-Allow-Origin' '*';
         add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE';
         add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization, X-Requested-With';
@@ -63,16 +68,10 @@ server {
     }
 
     location / {
-        if ($http_x_a_key != ${X_A_KEY}) {
-            return 404;
-        }
         try_files $uri $uri/ /index.php$is_args$args;
     }
 
     location ~ \.php$ {
-        if ($http_x_a_key != ${X_A_KEY}) {
-            return 404;
-        }
         add_header 'Access-Control-Allow-Origin' '*';
         add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE';
         add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization, X-Requested-With';
