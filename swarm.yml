@@ -79,7 +79,7 @@ services:
                 constraints: [node.role == manager]
 
     wordpress:
-        image: wordpress:6.6-php8.1-fpm-alpine
+        image: wordpress:php8.1-fpm
         environment:
             WORDPRESS_DB_HOST: db
             WORDPRESS_DB_USER: ${MYSQL_USER}
