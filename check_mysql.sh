@@ -28,7 +28,7 @@ if [ -z "$CONTAINER_ID" ]; then
 fi
 
 # Attempt to connect to the MySQL container
-if docker exec -it "$CONTAINER_ID" mysql -u root --password="$MYSQL_ROOT_PASSWORD" -e "exit"; then
+if docker exec "$CONTAINER_ID" mysql -u root --password="$MYSQL_ROOT_PASSWORD" -e "exit"; then
     echo "Login to MySQL successful."
 else
     TO="glazunovgennadyanatolyevitch@yandex.ru"  # Change to the recipient's email address
