@@ -14,6 +14,7 @@ if source ./load-env.sh ; then
 else
     echo "Error: Failed to load environment variables."
     exit 1
+fi
 
 # Define variables
 BACKUP_FILE="$1"
