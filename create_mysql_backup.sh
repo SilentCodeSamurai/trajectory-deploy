@@ -8,13 +8,9 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 
-# Load environment variables from the load-env.sh file
-if source ./load-env.sh ; then
-    echo "Environment variables loaded successfully."
-else
-    echo "Error: Failed to load environment variables."
-    exit 1
-fi
+set -o allexport
+source /root/trajectory-deploy/.env
+set +o allexport
 
 # Define variables
 BACKUP_FILE="$1"
