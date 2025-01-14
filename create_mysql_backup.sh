@@ -9,7 +9,11 @@ if [ "$#" -ne 1 ]; then
 fi
 
 # Load environment variables from the load-env.sh file
-source ./load-env.sh
+if source ./load-env.sh ; then
+    echo "Environment variables loaded successfully."
+else
+    echo "Error: Failed to load environment variables."
+    exit 1
 
 # Define variables
 BACKUP_FILE="$1"

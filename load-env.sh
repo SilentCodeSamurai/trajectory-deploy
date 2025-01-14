@@ -1,3 +1,3 @@
 set -o allexport
-source .env set
+source /root/trajectory-deploy/.env set
 +o allexport
