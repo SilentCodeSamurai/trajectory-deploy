@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# mysql_cli.sh
+# check_mysql.sh
 
 # Load environment variables from .env file
 set -o allexport
-source .env
+source /root/trajectory-deploy/.env
 set +o allexport
 
 SERVICE_NAME="${STACK_NAME}_db"
