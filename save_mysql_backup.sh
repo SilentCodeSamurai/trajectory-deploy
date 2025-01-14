@@ -4,7 +4,7 @@
 
 # Load environment variables from .env file
 set -o allexport
-source .env
+source /root/trajectory-deploy/.env
 set +o allexport
 
 log() {
