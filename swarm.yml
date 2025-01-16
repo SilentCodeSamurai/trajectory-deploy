@@ -207,16 +207,16 @@ services:
     #                 cpus: "0.50"
     #                 memory: 512M
 
-    wordpress-exporter:
-        image: hipages/php-fpm_exporter:latest
-        environment:
-            - PHP_FPM_SCRAPE_URI=tcp://wordpress-{{.Task.Slot}}:9000/status
-        networks:
-            - intranet
-        deploy:
-            replicas: 1
-            restart_policy:
-                condition: on-failure
+    # wordpress-exporter:
+    #     image: hipages/php-fpm_exporter:latest
+    #     environment:
+    #         - PHP_FPM_SCRAPE_URI=tcp://wordpress-{{.Task.Slot}}:9000/status
+    #     networks:
+    #         - intranet
+    #     deploy:
+    #         replicas: 1
+    #         restart_policy:
+    #             condition: on-failure
 
     cadvisor:
         image: gcr.io/cadvisor/cadvisor
